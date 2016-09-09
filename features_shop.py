@@ -7,7 +7,15 @@ class Feature(object):
     @abc.abstractmethod
     def generate(self, sf):
         pass
-
+    
+    @staticmethod
+    def validateData(sf, column_name): 
+        if column_name in sf.column_names():
+            return
+        else:
+            raise Exception('column ' + column_name + ' not found in SFrame.')
+            
+            
 class crossMA(Feature):
     price = 'close'
     def __init__(self, MA1, MA2):
@@ -16,6 +24,7 @@ class crossMA(Feature):
         self.name = str(MA1) + '/' + str(MA2)
 
     def generate(self, sf):
+        Feature.validateData(sf, self.price)
         sma1 = sf[self.price].rolling_mean(-1*self.MA1, 0)
         sma2 = sf[self.price].rolling_mean(-1*self.MA2, 0)
         diff = sma1 - sma2
@@ -32,14 +41,16 @@ class crossMA(Feature):
         return self.name
 
 class RSI(Feature):
-    _default_period = 14
-
-    def __init__(self, period, column):
+    
+    def __init__(self, period = 14, column = 'gain'):
+        self.period = period
         self.column = column
-        if not period:
-            self.period = self._default_period
-        else:
-            self.period = period
+        self.name = 'rsi'+str(self.period)
+        
+    def generate(self, sf):
+        Feature.validateData(sf, self.column)
+        sf.add_column(RSI.compute(sf, self.period, self.column), name= self.name)
+        return self.name
 
     @classmethod
     def compute(cls, sf, period, column):
@@ -64,14 +75,6 @@ class RSI(Feature):
                 loss += u if u < 0 else 0
                 j += 1
         return SArray(rsi)
-
-    def generate(self, sf):
-        if self.column in sf.column_names():
-            name = 'rsi'+str(self.period)
-            sf.add_column(RSI.compute(sf, self.period, self.column), name= name)
-            return name
-        else:
-            raise Exception(str(self.column) + ' is not found in SFrame.')
             
             
 class FeatureFactory(object):
