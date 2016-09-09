@@ -1,28 +1,6 @@
 from graphlab import SArray, SFrame
 import abc
 
-
-class FeatureFactory(object):
-
-    @staticmethod
-    def generate_moving_average(sf, column = 'close', new_column='MA', period = 14):
-        if column in sf.column_names():
-            sf.add_column(sf[column].rolling_mean(-1*period, 0), name = new_column+str(period))
-            return new_column+str(period)
-        else:
-            raise Exception(column + 'not in sframe')
-
-    @staticmethod
-    def generate_rsi(sf, column='gain', n=14):
-        rsi = RSI(n, column)
-        return rsi.generate(sf)
-
-
-    @staticmethod
-    def generate(sf, func, feat_name):
-        sf[feat_name] = func()
-
-
 class Feature(object):
     __metaclass__ = abc.ABCMeta
 
@@ -94,7 +72,26 @@ class RSI(Feature):
             return name
         else:
             raise Exception(str(self.column) + ' is not found in SFrame.')
+            
+            
+class FeatureFactory(object):
 
+    @staticmethod
+    def generate_moving_average(sf, column = 'close', new_column='MA', period = 14):
+        if column in sf.column_names():
+            sf.add_column(sf[column].rolling_mean(-1*period, 0), name = new_column+str(period))
+            return new_column+str(period)
+        else:
+            raise Exception(column + 'not in sframe')
+
+    @staticmethod
+    def generate_rsi(sf, column='gain', n=14):
+        rsi = RSI(n, column)
+        return rsi.generate(sf)
+
+    @staticmethod
+    def generate(sf, func, feat_name):
+        sf[feat_name] = func()
 # rsi = RSI(14, 'gain')
 # print type(RSI)
 # sf = SFrame({'a':[1,2,3]})
