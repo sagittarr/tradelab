@@ -18,8 +18,12 @@ data['outcome'] = data.apply(lambda x: 1 if x['close'] > x['open'] else -1)
 data['ho'] = data['high'] - data['open'] # distance between Highest and Opening price
 data['lo'] = data['low'] - data['open'] # distance between Lowest and Opening price
 data['gain'] = data['close'] - data['open']
-rsi_14 = FeatureFactory.generate_rsi(data, n = 14)
-rsi_5 = FeatureFactory.generate_rsi(data, n = 5)
+
+# feature generation
+rsi_14 = RSI(14).generate(data)
+rsi_5 = RSI(5).generate(data)
+# rsi_14 = FeatureFactory.generate_rsi(data, n = 14)
+# rsi_5 = FeatureFactory.generate_rsi(data, n = 5)
 ma_20 = FeatureFactory.generate_moving_average(data, period=20)
 ma_5 = FeatureFactory.generate_moving_average(data, period=5)
 crossMA1_10 = crossMA(1, 10).generate(data)
@@ -41,8 +45,8 @@ ts['dRtn'] = ts['close']/ts_1['close']
 ts['idRtn'] = ts['close']/ts['open']
 ts['jump'] = ts['open'] > ts_1['high']
 ts['aboveMA'] = ts['open'] > ts_1[ma_20]
-ts['rsi14'] = ts_1['rsi14']
-ts['rsi5'] = ts_1['rsi5']
+ts[rsi_14] = ts_1[rsi_14]
+ts[rsi_5] = ts_1[rsi_5]
 ts[crossMA5_20] = ts_1[crossMA5_20]
 ts[crossMA1_10] = ts_1[crossMA1_10]
 # ts[ma_20] = ts_1[ma_20]
